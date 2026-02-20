@@ -1,10 +1,313 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Awesome New Website Title</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrowserOS</title>
+  <style>
+    :root {
+      --bg-1: #0f172a;
+      --bg-2: #1e293b;
+      --panel: rgba(15, 23, 42, 0.75);
+      --text: #e2e8f0;
+      --accent: #38bdf8;
+      --danger: #f87171;
+      --ok: #4ade80;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 20%, #1d4ed8 0%, transparent 35%),
+        radial-gradient(circle at 80% 70%, #7c3aed 0%, transparent 40%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .desktop {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      padding: 16px;
+    }
+
+    .dock {
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .app-btn {
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(30, 41, 59, 0.7);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .app-btn:hover { border-color: var(--accent); }
+
+    .topbar {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 14px;
+      backdrop-filter: blur(8px);
+    }
+
+    .window {
+      position: absolute;
+      width: min(600px, 90vw);
+      min-height: 240px;
+      top: 80px;
+      left: 80px;
+      background: var(--panel);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(2, 6, 23, 0.5);
+      overflow: hidden;
+      display: none;
+    }
+
+    .window.active { display: block; }
+
+    .window-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 10px 12px;
+      cursor: move;
+      user-select: none;
+    }
+
+    .window-title { font-weight: 600; }
+
+    .controls { display: flex; gap: 8px; }
+
+    .ctrl {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .ctrl.close { background: var(--danger); }
+    .ctrl.min { background: #fbbf24; }
+    .ctrl.max { background: var(--ok); }
+
+    .window-content {
+      padding: 14px;
+      height: 320px;
+      overflow: auto;
+      line-height: 1.45;
+    }
+
+    .terminal {
+      background: #020617;
+      border-radius: 10px;
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: #a7f3d0;
+      min-height: 240px;
+      white-space: pre-wrap;
+    }
+
+    .terminal-input {
+      margin-top: 10px;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: #0b1226;
+      color: #e2e8f0;
+      padding: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    ul { margin-top: 6px; }
+  </style>
 </head>
 <body>
-    <h1>Hello, World! Welcome to r0zj's Website!</h1>
-    <p>This page confirms GitHub Pages is working.</p>
+  <div class="desktop">
+    <div class="topbar">
+      <div>🖥️ BrowserOS</div>
+      <div id="clock">--:--:--</div>
+    </div>
+
+    <div class="window" id="aboutWindow" style="top:120px; left: 90px;">
+      <div class="window-header">
+        <span class="window-title">About</span>
+        <div class="controls">
+          <button class="ctrl min" aria-label="Minimize"></button>
+          <button class="ctrl max" aria-label="Maximize"></button>
+          <button class="ctrl close" data-close="aboutWindow" aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="window-content">
+        <h2>Welcome to BrowserOS</h2>
+        <p>A tiny operating-system-style interface built in a single HTML file.</p>
+        <ul>
+          <li>Windowed apps</li>
+          <li>Live clock</li>
+          <li>Simple terminal commands</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="window" id="notesWindow" style="top:150px; left: 180px;">
+      <div class="window-header">
+        <span class="window-title">Notes</span>
+        <div class="controls">
+          <button class="ctrl min" aria-label="Minimize"></button>
+          <button class="ctrl max" aria-label="Maximize"></button>
+          <button class="ctrl close" data-close="notesWindow" aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="window-content">
+        <p><strong>Mission:</strong> Make an OS ✔️</p>
+        <p>This is a playful, browser-based mini desktop.</p>
+      </div>
+    </div>
+
+    <div class="window" id="terminalWindow" style="top:180px; left: 260px;">
+      <div class="window-header">
+        <span class="window-title">Terminal</span>
+        <div class="controls">
+          <button class="ctrl min" aria-label="Minimize"></button>
+          <button class="ctrl max" aria-label="Maximize"></button>
+          <button class="ctrl close" data-close="terminalWindow" aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="window-content">
+        <div class="terminal" id="terminalOutput">BrowserOS shell\nType: help</div>
+        <input class="terminal-input" id="terminalInput" placeholder="Enter command and press Enter" />
+      </div>
+    </div>
+
+    <div class="dock">
+      <button class="app-btn" data-open="aboutWindow">About</button>
+      <button class="app-btn" data-open="notesWindow">Notes</button>
+      <button class="app-btn" data-open="terminalWindow">Terminal</button>
+    </div>
+  </div>
+
+  <script>
+    const windows = [...document.querySelectorAll('.window')];
+    let z = 10;
+
+    function openWindow(id) {
+      const win = document.getElementById(id);
+      if (!win) return;
+      win.classList.add('active');
+      win.style.zIndex = ++z;
+    }
+
+    document.querySelectorAll('[data-open]').forEach((btn) => {
+      btn.addEventListener('click', () => openWindow(btn.dataset.open));
+    });
+
+    document.querySelectorAll('[data-close]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.getElementById(btn.dataset.close)?.classList.remove('active');
+      });
+    });
+
+    windows.forEach((win) => {
+      const header = win.querySelector('.window-header');
+      header.addEventListener('mousedown', (e) => {
+        win.style.zIndex = ++z;
+        const rect = win.getBoundingClientRect();
+        const dx = e.clientX - rect.left;
+        const dy = e.clientY - rect.top;
+
+        function move(ev) {
+          win.style.left = `${Math.max(0, ev.clientX - dx)}px`;
+          win.style.top = `${Math.max(36, ev.clientY - dy)}px`;
+        }
+
+        function up() {
+          window.removeEventListener('mousemove', move);
+          window.removeEventListener('mouseup', up);
+        }
+
+        window.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', up);
+      });
+
+      win.addEventListener('mousedown', () => {
+        win.style.zIndex = ++z;
+      });
+    });
+
+    function tick() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString();
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    const output = document.getElementById('terminalOutput');
+    const input = document.getElementById('terminalInput');
+
+    const commands = {
+      help: 'Commands: help, date, echo <text>, clear, neofetch',
+      date: () => new Date().toString(),
+      neofetch: 'BrowserOS v1\nKernel: JS\nShell: tinysh\nUptime: depends on your tab',
+      clear: '__CLEAR__'
+    };
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      const raw = input.value.trim();
+      if (!raw) return;
+
+      let line = `\n> ${raw}\n`;
+      const [cmd, ...rest] = raw.split(' ');
+
+      if (cmd === 'echo') {
+        line += rest.join(' ') || '';
+      } else if (!commands[cmd]) {
+        line += 'Command not found. Type help.';
+      } else {
+        const result = typeof commands[cmd] === 'function' ? commands[cmd]() : commands[cmd];
+        if (result === '__CLEAR__') {
+          output.textContent = 'BrowserOS shell';
+          input.value = '';
+          return;
+        }
+        line += result;
+      }
+
+      output.textContent += line;
+      output.scrollTop = output.scrollHeight;
+      input.value = '';
+    });
+
+    openWindow('aboutWindow');
+  </script>
 </body>
 </html>
